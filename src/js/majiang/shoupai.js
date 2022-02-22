@@ -1,8 +1,3 @@
-/*
- *  Majiang.Shoupai
- */
-"use strict";
-
 module.exports = class Shoupai {
   constructor(qipai) {
     this._bingpai = {
@@ -53,6 +48,15 @@ module.exports = class Shoupai {
           .sort()
           .join("");
       return hongpai ? h.replace(/5/, "0") : h;
+    } else if (h.match(/^z[1234]{4,}$/)) {
+      let nn = h.match(/\d/g).sort();
+      if (new Set(nn).size !== 4) return;
+      return h[0] + nn.join("");
+    } else if (h.match(/^z[567]+\-?[567]*$/)) {
+      let nn = h.match(/\d/g).sort();
+      if (nn.length > 3 && m.match(/\d\-/)) return;
+      if (new Set(nn).size !== 3) return;
+      return h[0] + h.match(/\d\-?/g).sort().join("");
     }
   }
 
@@ -186,7 +190,8 @@ module.exports = class Shoupai {
     return this;
   }
 
-  gang(p) {
+  gang(p, xf = false) {
+    if (xf) return this.xfgang(p);
     if (!Shoupai.valid_pai(p)) throw new Error(p);
     if (!this._zimo || this._zimo.length != 2) throw new Error([this, p]);
     let [s, n] = p;
@@ -218,6 +223,39 @@ module.exports = class Shoupai {
     return this;
   }
 
+  xfgang(p) {
+    if (!Shoupai.valid_pai(p)) throw new Error(p);
+    if (!this._zimo || this._zimo.length != 2) throw new Error([this, p]);
+    if (!p.match(/^z[1-7]$/)) throw new Error([this, p]);
+    let [s, n] = p;
+    let bingpai = this._bingpai[s];
+    let zfb = n > 4;
+    let tmp = nullp;
+    let i = this._fulou.findIndex((m) =>
+      m.match(zfb ? /^z[567]{3,}$/ : /^z[1234]{4,}$/)
+    );
+    if (i >= 0) {
+      if (bingpai[n] == 0) throw new Error([this, p]);
+      this._fulou[i] = Shoupai.valid_mianzi(this._fulou[i] + n);
+      bingpai[n]--;
+    } else if (!zfb) {
+      for (let t of [1, 2, 3, 4]) {
+        if (!bingpai[t]) throw new Error([this, p]);
+        bingpai[t]--;
+      }
+      this._fulou.push("z1234");
+    } else {
+      for (let t of [5, 6, 7]) {
+        if (!bingpai[t]) throw new Error([this, p]);
+        bingpai[t]--;
+      }
+      this._fulou.push("z567");
+      tmp = this._zimo;
+    }
+    this._zimo = tmp;
+    return this;
+  }
+
   menqian() {
     return this._fulou.filter((m) => m.match(/[\+\=\-]/)).length == 0;
   }
@@ -227,12 +265,13 @@ module.exports = class Shoupai {
   }
 
   get_dapai() {
+    // after fulou
     if (!this._zimo) throw new Error([this, p]);
 
     let deny = {};
     let s = this._zimo[0];
     let m = s == "z" ? this._zimo : this._zimo.replace(/0/, "5");
-    let n = +m.match(/\d(?=[\+\=\-])/);
+    let n = +m.match(/\d(?=[\+\=\-])/); // 进张
     if (n) {
       deny[s + n] = true;
       if (!m.match(/^[mpsz](\d)\1\1/)) {
@@ -372,6 +411,33 @@ module.exports = class Shoupai {
           }
         }
       }
+    }
+
+    return mianzi;
+  }
+
+  get_xfgang_mianzi(p) {
+    if (!this._zimo) throw new Error([this, p]);
+    let mianzi = [];
+    if (p) return mianzi;
+
+    let bingpai = this._bingpai["z"];
+    let zfb = this._fulou.find((m) => m.match(/^z[567]{3,}$/));
+    let eswn = this._fulou.find((m) => m.match(/^z[1234]{4,}$/));
+
+    if (zfb) {
+      for (let t of [5, 6, 7]) {
+        if (bingpai[t]) mianzi.push(Shoupai.valid_mianzi(zfb + t));
+      }
+    } else if (bingpai[5] && bingpai[6] && bingpai[7]) {
+      mianzi.push("z567");
+    }
+    if (eswn) {
+      for (let t of [1, 2, 3, 4]) {
+        if (bingpai[t] > 0) mianzi.push(Shoupai.valid_mianzi(zfb + t));
+      }
+    } else if (bingpai[1] && bingpai[2] && bingpai[3] && bingpai[4]) {
+      mianzi.push("z567");
     }
 
     return mianzi;
