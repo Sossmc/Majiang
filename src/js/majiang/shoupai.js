@@ -230,7 +230,7 @@ module.exports = class Shoupai {
     let [s, n] = p;
     let bingpai = this._bingpai[s];
     let zfb = n > 4;
-    let tmp = nullp;
+    let tmp = null;
     let i = this._fulou.findIndex((m) =>
       m.match(zfb ? /^z[567]{3,}$/ : /^z[1234]{4,}$/)
     );
@@ -307,9 +307,17 @@ module.exports = class Shoupai {
     let [s, n, d] = p.replace(/[\_\*]/g, "");
     n = +n || 5;
     if (!d) throw new Error([this, p]);
-    if (s == "z" || d != "-") return mianzi;
+    if (d != "-") return mianzi;
 
     let bingpai = this._bingpai[s];
+
+    if (s == "z") {
+      if (n == 5 && bingpai[6] && bingpai[7]) mianzi.push("z5-67");
+      else if (n == 6 && bingpai[5] && bingpai[7]) mianzi.push("z56-7");
+      else if (n == 7 && bingpai[5] && bingpai[6]) mianzi.push("z567-");
+      return mianzi;
+    }
+
     const hongpai_first = (n) => (n == 5 && bingpai[0] > 0 ? 0 : n);
     let [p0, p1, p2] = [p[1]];
 
@@ -364,7 +372,7 @@ module.exports = class Shoupai {
     return mianzi;
   }
 
-  get_gang_mianzi(p) {
+  get_gang_mianzi(p, xf = true) {
     let mianzi = [];
 
     if (p) {
@@ -413,6 +421,7 @@ module.exports = class Shoupai {
       }
     }
 
+    if (xf) return [...this.get_xfgang_mianzi(p), ...mianzi];
     return mianzi;
   }
 
