@@ -393,6 +393,8 @@ module.exports = class Shoupai {
         p3 = hongpai_first(n, 0);
         mianzi = [s + p1 + p2 + p3 + (p0 + d)];
       }
+
+      return mianzi;
     } else {
       if (!this._zimo) throw new Error([this, p]);
       if (this._zimo.length != 2) throw new Error([this, p]);
@@ -419,10 +421,9 @@ module.exports = class Shoupai {
           }
         }
       }
-    }
 
-    if (xf) return [...this.get_xfgang_mianzi(p), ...mianzi];
-    return mianzi;
+      if (xf) return [...this.get_xfgang_mianzi(p), ...mianzi];
+    }
   }
 
   get_xfgang_mianzi(p) {
