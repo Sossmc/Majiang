@@ -24,6 +24,7 @@ constructor(hongpai = {m:0,p:0,s:0}) {
     while (pai.length) {
         this._pai.push(pai.splice(Math.random()*pai.length, 1)[0]);
     }
+    this._originShan = this._pai.concat()
     this._baopai   = [this._pai[4]];
     this._fubaopai = [this._pai[9]];
     this._weikaigang = false;
