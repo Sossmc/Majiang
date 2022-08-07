@@ -489,7 +489,9 @@ select_dapai(info) {
     for (let p of this.get_dapai()) {
         if (! dapai) dapai = p;
         let shoupai = this._shoupai.clone().dapai(p);
-        if (Majiang.Util.xiangting(shoupai) > n_xiangting) {
+        if (n_xiangting > 2 && this.xiangting(shoupai) > n_xiangting ||
+            Majiang.Util.xiangting(shoupai) > n_xiangting)
+        {
             if (anquan) continue;
             if (n_xiangting < 2) backtrack.push(p);
             continue;
@@ -508,7 +510,8 @@ select_dapai(info) {
             if (! info.find(x => x.p == p.substr(0,2) && ! x.m)) {
                 info.push({
                     p: p.substr(0,2), n_xiangting: n_xiangting, ev: ev,
-                    tingpai: tingpai, n_tingpai: n_tingpai
+                    tingpai: tingpai, n_tingpai: n_tingpai,
+                    weixian: weixian && weixian(p)
                 });
             }
         }
@@ -570,7 +573,8 @@ select_dapai(info) {
             info.push({
                 p: anquan.substr(0,2),
                 n_xiangting: Majiang.Util.xiangting(
-                                        this._shoupai.clone().dapai(anquan))
+                                        this._shoupai.clone().dapai(anquan)),
+                weixian: weixian(anquan)
             });
         }
     }
@@ -612,7 +616,7 @@ xiangting(shoupai) {
         for (let n of [zhuangfeng+1, menfeng+1, 5, 6, 7]) {
             if (shoupai._bingpai.z[n] >= 3) n_fanpai++;
             else if (shoupai._bingpai.z[n] == 2
-                     && suanpai.paishu('z'+n)) back = n;
+                     && suanpai.paishu('z'+n)) back = 'z'+n+n+n+'+';
             for (let m of shoupai._fulou) {
                 if (m[0] == 'z' && m[1] == n) n_fanpai++;
             }
@@ -620,7 +624,9 @@ xiangting(shoupai) {
         if (n_fanpai) return Majiang.Util.xiangting(shoupai);
         if (back) {
             let new_shoupai = shoupai.clone();
-            new_shoupai._bingpai.z[back] = 3;
+            new_shoupai._zimo = null;
+            new_shoupai.fulou(back);
+            new_shoupai._zimo = null;
             return Majiang.Util.xiangting(new_shoupai) + 1;
         }
         return Infinity;
